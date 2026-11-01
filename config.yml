@@ -1,0 +1,17 @@
+# Shown at the top of the page.
+title: Read it later library
+
+# How many of the newest items to keep from each feed.
+per_feed_cap: 6
+
+# Hide items older than this. A feed with nothing newer is listed as needing attention.
+max_age_days: 30
+
+# The page says the library refreshes about this often.
+# The real schedule is the cron line in .github/workflows/refresh.yml
+# (17 */5 * * * means minute 17, every 5 hours, UTC). Change both together.
+refresh_hours: 5
+
+# Clock and date style for the "built" line and each article.
+timezone: Europe/London
+locale: en-GB

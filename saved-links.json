@@ -1,0 +1,11 @@
+{
+  "_format": {
+    "links": "Newest first. The Add link action inserts entries. You can also add one by editing this file.",
+    "url": "Required. An http:// or https:// address.",
+    "title": "Optional. Shown as the headline. The address is used when this is empty.",
+    "topic": "Optional. A short label such as News or Technology. Shown as a tag. It does not have to match a heading in feeds.yml.",
+    "added": "The day it was saved, YYYY-MM-DD. The Add link action sets this.",
+    "note": "Optional. Shown on the page. Do not put anything private here."
+  },
+  "links": []
+}

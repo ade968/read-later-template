@@ -1,0 +1,10 @@
+# Generated site. The build writes this. Do not commit it.
+_site/
+.venv/
+.pydeps/
+__pycache__/
+*.pyc
+*.tmp
+tools/*.json
+tools/*.tsv
+tools/*.csv

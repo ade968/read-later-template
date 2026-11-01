@@ -1,0 +1,29 @@
+name: Add link
+description: Save an article to your Read it later library
+title: "Add link"
+labels: ["add-link"]
+body:
+  - type: input
+    id: link
+    attributes:
+      label: Link
+      description: The address of the article. It must start with https:// or http://.
+      placeholder: https://
+    validations:
+      required: true
+  - type: input
+    id: link_title
+    attributes:
+      label: Title
+      description: Optional. The headline you want to see.
+  - type: input
+    id: topic
+    attributes:
+      label: Topic
+      description: Optional. A short label such as News or Technology.
+      placeholder: News
+  - type: textarea
+    id: note
+    attributes:
+      label: Note
+      description: Optional. This is shown on the site, so do not put anything private here.

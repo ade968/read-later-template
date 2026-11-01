@@ -1,0 +1,113 @@
+name: Refresh library
+
+# Schedule, a manual run, a new issue, or a repository_dispatch from the owner.
+# Fork pull requests are not a trigger, so a fork cannot run this file or read secrets.
+on:
+  schedule:
+    # Minute 17, every 5 hours, UTC. Keep this in step with refresh_hours in config.yml.
+    - cron: "17 */5 * * *"
+  workflow_dispatch:
+  issues:
+    types: [opened]
+  repository_dispatch:
+    types: [add-link]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: library-refresh
+  cancel-in-progress: false
+
+jobs:
+  add-link:
+    # Issues: the opener must be the repository owner and the form must have added
+    # the add-link label. Anyone else's issue is ignored.
+    # repository_dispatch: only the owner's own token (the actor is the owner).
+    if: >-
+      (github.event_name == 'repository_dispatch' &&
+       github.actor == github.repository_owner) ||
+      (github.event_name == 'issues' &&
+       contains(github.event.issue.labels.*.name, 'add-link') &&
+       github.event.issue.user.login == github.repository_owner)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      issues: write
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      # Issue title and body are passed only as environment values, never spliced into the shell.
+      - name: Add link from issue
+        if: github.event_name == 'issues'
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_AUTHOR: ${{ github.event.issue.user.login }}
+          ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: python scripts/add_link_from_issue.py
+      - name: Add link from repository_dispatch
+        if: github.event_name == 'repository_dispatch'
+        env:
+          LINK_URL: ${{ github.event.client_payload.url }}
+          LINK_TITLE: ${{ github.event.client_payload.title }}
+          LINK_TOPIC: ${{ github.event.client_payload.topic }}
+          LINK_NOTE: ${{ github.event.client_payload.note }}
+          ISSUE_AUTHOR: ${{ github.actor }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: python scripts/add_link_from_issue.py
+      - name: Commit saved-links.json
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898341+github-actions[bot]@users.noreply.github.com"
+          git add -- saved-links.json
+          if git diff --cached --quiet; then
+            echo "No change to saved-links.json."
+            exit 0
+          fi
+          git commit -m "Add saved link"
+          git push
+
+      - name: Close the add-link issue
+        if: github.event_name == 'issues'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          gh issue close "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --comment "Saved to the library."
+
+  trigger-rebuild:
+    # Feed contents change without a git commit, so a schedule or a manual run
+    # asks the host to rebuild main. An add-link commit rebuilds on its own.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Trigger rebuild
+        env:
+          VERCEL_DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          set -euo pipefail
+          hook="${VERCEL_DEPLOY_HOOK_URL:-}"
+          if [ -z "$hook" ]; then
+            echo "::notice title=Rebuild skipped::VERCEL_DEPLOY_HOOK_URL is not set, so no rebuild was triggered."
+            exit 0
+          fi
+          # -fsS fails on HTTP errors and stays quiet. stderr is discarded because a
+          # curl error line can repeat the request address. Do not echo the hook.
+          if ! curl -fsS -o /dev/null --max-time 30 -X POST "$hook" 2>/dev/null; then
+            echo "::error::The deploy hook was rejected. The address was not written to the log."
+            exit 1
+          fi
+          echo "Deploy hook accepted."

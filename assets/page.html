@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="%%LANG%%">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%%TITLE%%</title>
+<style>%%STYLE%%</style>
+</head>
+<body>
+<main>
+<h1>%%TITLE%%</h1>
+<svg class="sprig" viewBox="0 0 148 36" width="148" height="36" aria-hidden="true"><path d="M4 24c16-1 26-12 40-12 8 0 12 7 22 6 12-1 16-12 30-12 10 0 16 8 28 7 8 0 14-6 20-6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M42 13c-7-8-1-14 3-15 1 7 0 11-3 15z" fill="currentColor"/><path d="M78 20c8-7 14-5 16 0-7 3-12 2-16 0z" fill="currentColor"/><path d="M112 14c-5-10 3-14 7-13 0 7-2 11-7 13z" fill="currentColor"/><circle cx="132" cy="19" r="2.1" fill="currentColor"/></svg>
+<p class="meta">Built %%BUILT%% · %%COUNT%% articles from %%FEEDS%% feeds · up to %%CAP%% per feed, last %%AGE%% days · refreshed about every %%HOURS%% hours</p>
+<div class="tools">
+<div class="chips" id="chips"></div>
+<input id="q" type="search" placeholder="Search titles and sources" aria-label="Search titles and sources">
+</div>
+<noscript><p class="meta">This page uses a script from this site to lay out the articles. Your browser is not running it.</p></noscript>
+<div id="list"></div>
+%%DEAD%%
+</main>
+<script type="application/json" id="library-data">%%DATA%%</script>
+<script>%%SCRIPT%%</script>
+</body>
+</html>
