@@ -53,4 +53,10 @@ article a{color:var(--ink);font-weight:600;text-decoration:underline;text-decora
 details{margin-top:22px;color:var(--muted);font-size:.92rem}
 summary{min-height:44px;display:flex;align-items:center;cursor:pointer}
 :focus-visible{outline:2px solid var(--honey);outline-offset:3px}
+@media(max-width:600px){
+  .tools{padding:6px 0 8px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;margin-bottom:8px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex-shrink:0}
+}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
